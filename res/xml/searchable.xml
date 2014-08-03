@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<searchable xmlns:android="http://schemas.android.com/apk/res/android"
+            android:label="@string/search_label"
+            android:hint="@string/search_hint"
+            android:searchMode="showSearchLabelAsBadge"
+            android:searchSettingsDescription="@string/settings_description"
+            android:searchSuggestAuthority="@string/searchSuggest_Authority"
+            android:searchSuggestIntentAction="android.intent.action.VIEW"
+            android:searchSuggestPath="task"
+            android:searchSuggestThreshold="1"
+            android:includeInGlobalSearch="true"
+            android:searchSuggestSelection="\?"
+        >
+
+</searchable>

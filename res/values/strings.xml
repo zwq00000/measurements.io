@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ACTIVITY_ENTRY_NAME</string>
+    <string name="refreshing">Refreshing...</string>
+    <string name="search_label">search_label</string>
+    <string name="search_hint">search_hint</string>
+    <string name="settings_description">search_hint</string>
+    <string name="searchSuggest_Authority">jifengda.measurements</string>
+</resources>
