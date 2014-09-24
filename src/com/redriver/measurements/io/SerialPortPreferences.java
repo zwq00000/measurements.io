@@ -37,6 +37,16 @@ import com.hoho.android.usbserial.driver.UsbSerialPort;
     private static final String KEY_DEFAULT_PORT_NAME = "portName";
 
     /**
+     * 接收器类型 存储键
+     */
+    private static final String Key_ReceiverType = "ReceiverType";
+
+    /**
+     * 默认 接收器类型
+     */
+    private static final String Default_ReceiverType = "UsbFrameReceiver";
+
+    /**
      * 获取端口名称
      * @param context
      * @return
@@ -145,5 +155,22 @@ import com.hoho.android.usbserial.driver.UsbSerialPort;
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt(key, value);
         editor.commit();
+    }
+
+    /**
+     * 获取 接收器类型
+     * @return
+     */
+    public static String getReceiverType(Context context) {
+        return getValue(context,Key_ReceiverType,Default_ReceiverType);
+    }
+
+    /**
+     * 设置 接收器类型
+     * @param context
+     * @param receiverType
+     */
+    public static void setReceiverType(Context context,String receiverType){
+        setValue(context,Key_ReceiverType,receiverType);
     }
 }

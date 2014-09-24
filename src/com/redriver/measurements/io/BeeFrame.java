@@ -191,8 +191,7 @@ public final class BeeFrame {
      * @see com.redriver.measurements.io.BeeFrame#getData 字段的按位异或校验
      */
     public byte getCheckSum() {
-        byte dataLen = getDataLen();
-        return calculateChecksum(frameData,POSITION_FRAME_TYPE,dataLen);
+        return frameData[getDataLen()+2];
     }
 
     /**

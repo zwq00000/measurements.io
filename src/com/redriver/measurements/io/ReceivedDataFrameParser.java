@@ -19,15 +19,14 @@ import java.util.regex.Pattern;
  * Created by zwq00000 on 2014/6/21.
  */
 public final class ReceivedDataFrameParser {
-
-    /**
-     * 帧类型位置
-     */
-    static final int POSITION_FRAME_TYPE = 2;
     /**
      * 数据长度位置
      */
     static final int POSITION_DATA_LENGTH = 1;
+    /**
+     * 帧类型位置
+     */
+    static final int POSITION_FRAME_TYPE = 2;
     /**
      * 载荷数据起始位置
      */
@@ -153,7 +152,7 @@ public final class ReceivedDataFrameParser {
                 if (getCheckSum(bytes, offset + POSITION_FRAME_TYPE, dataLen) != (byte) checksum) {
                     throw new IOException("数据包校验错误");
                 }
-                if (bytes[offset + POSITION_FRAME_TYPE] == FrameTypes.RX_RECEIVED_DATA_FRAME) {
+                if (FrameTypes.getBaseFrameType(bytes[offset + POSITION_FRAME_TYPE]) == FrameTypes.RECEIVED_DATA) {
                     return createFromBytes(bytes, offset + POSITION_FRAME_TYPE, dataLen);
                 }
             }

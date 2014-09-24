@@ -1,22 +1,25 @@
-package com.redriver.measurements.io;
+package com.redriver.measurements.io.SerialPort;
 
 import android.util.Log;
 import com.redriver.measurements.core.MeasureRecord;
+import com.redriver.measurements.io.FrameReceiver;
+import com.redriver.measurements.io.ReceivedDataFrameParser;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 /**
  * 基于 {@link java.io.InputStream} 基本IO 流的 接收器
- * @see BeeFrame 数据帧接收器
+ * @see com.redriver.measurements.io.BeeFrame 数据帧接收器
  * Created by zwq00000 on 2014/5/18.
  */
-public final class BeeFrameReceiver extends AbstractFrameReceiver implements  Runnable {
+@Deprecated
+public final class InputStreamReceiver extends FrameReceiver implements  Runnable {
     private static final String TAG = "BeeFrameReceiver";
 
     private final InputStream mReceiverStream;
     private boolean isClosed;
-    public BeeFrameReceiver(InputStream receiverStream){
+    public InputStreamReceiver(InputStream receiverStream){
         if(receiverStream == null){
             throw new NullPointerException("receiver Stream is not been null");
         }

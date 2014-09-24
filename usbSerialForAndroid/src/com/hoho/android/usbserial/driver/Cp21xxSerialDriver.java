@@ -23,7 +23,6 @@ package com.hoho.android.usbserial.driver;
 
 import android.annotation.TargetApi;
 import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbRequest;
 import android.os.Build;
 import android.util.Log;
@@ -46,6 +45,19 @@ public class Cp21xxSerialDriver implements UsbSerialDriver {
     public Cp21xxSerialDriver(UsbDevice device) {
         mDevice = device;
         mPort = new Cp21xxSerialPort(mDevice, 0);
+    }
+
+    public static Map<Integer, int[]> getSupportedDevices() {
+        final Map<Integer, int[]> supportedDevices = new LinkedHashMap<Integer, int[]>();
+        supportedDevices.put(Integer.valueOf(UsbId.VENDOR_SILABS),
+                new int[]{
+                        UsbId.SILABS_CP2102,
+                        UsbId.SILABS_CP2105,
+                        UsbId.SILABS_CP2108,
+                        UsbId.SILABS_CP2110
+                }
+        );
+        return supportedDevices;
     }
 
     @Override
@@ -143,7 +155,7 @@ public class Cp21xxSerialDriver implements UsbSerialDriver {
         }
 
         @Override
-        protected void openInternal() throws IOException{
+        protected void openInternal() throws IOException {
             setConfigSingle(SILABSER_IFC_ENABLE_REQUEST_CODE, UART_ENABLE);
             setConfigSingle(SILABSER_SET_MHS_REQUEST_CODE, MCR_ALL | CONTROL_WRITE_DTR | CONTROL_WRITE_RTS);
             setConfigSingle(SILABSER_SET_BAUDDIV_REQUEST_CODE, BAUD_RATE_GEN_FREQ / DEFAULT_BAUD_RATE);
@@ -190,14 +202,22 @@ public class Cp21xxSerialDriver implements UsbSerialDriver {
             checkOpen();
             int readAmt = buffer.remaining();
             readAmt = Math.min(readAmt, mReadEndpoint.getMaxPacketSize());
+            Log.d(TAG, "bufferSize:" + readAmt);
             final UsbRequest request = new UsbRequest();
             try {
                 request.initialize(mConnection, this.mReadEndpoint);
-                if (!request.queue(buffer, readAmt)) {
-                    throw new IOException("Error queueing request.");
+                boolean requestQueueResult = request.queue(buffer, readAmt);
+                Log.d(TAG, "UsbRequest.queue result:" + requestQueueResult);
+                if (!requestQueueResult) {
+                    byte[] bytes = new byte[readAmt];
+                    int len = read(bytes, timeoutMillis);
+                    if(len>0) {
+                        buffer.put(bytes, 0, len);
+                    }
+                    return len;
                 }
                 if (mConnection.requestWait() == request) {
-                    if(buffer.position()==0) {
+                    if (buffer.position() == 0) {
                         buffer.position(readAmt);
                     }
                     return readAmt;
@@ -356,19 +376,6 @@ public class Cp21xxSerialDriver implements UsbSerialDriver {
             return true;
         }
 
-    }
-
-    public static Map<Integer, int[]> getSupportedDevices() {
-        final Map<Integer, int[]> supportedDevices = new LinkedHashMap<Integer, int[]>();
-        supportedDevices.put(Integer.valueOf(UsbId.VENDOR_SILABS),
-                new int[]{
-                        UsbId.SILABS_CP2102,
-                        UsbId.SILABS_CP2105,
-                        UsbId.SILABS_CP2108,
-                        UsbId.SILABS_CP2110
-                }
-        );
-        return supportedDevices;
     }
 
 }

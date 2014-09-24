@@ -16,10 +16,11 @@ import java.nio.ByteBuffer;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class AsyncUsbSerialManager {
     private static final String TAG = "AsyncUsbSerialManager";
+    private static final int BUFFER_SIZE = 1024;
     private final UsbSerialPort mDriver;
     private final UsbDeviceConnection mConnection;
     private final ByteBuffer mReadBuffer;
-    private final UsbRequest mReadRequest;
+    private UsbRequest mReadRequest;
     private RequestThread mThread;
     private volatile boolean isClosed;
     /*private final ArrayList<Listener> mCallbackListeners;*/
@@ -38,8 +39,7 @@ public class AsyncUsbSerialManager {
         }
         this.mConnection = connection;
         mDriver = driver;
-        mReadBuffer = ByteBuffer.allocate(1024);
-        mReadRequest = new UsbRequest();
+        mReadBuffer = ByteBuffer.allocate(BUFFER_SIZE);
         isClosed = false;
     }
 
@@ -63,6 +63,7 @@ public class AsyncUsbSerialManager {
         } else {
             mDriver.setParameters(SerialPortParameters.DefaultSettings);
         }
+        mReadRequest = new UsbRequest();
         mReadRequest.initialize(mConnection, mDriver.getReadEndPoint());
         mThread = new RequestThread();
         mThread.start();
@@ -70,6 +71,9 @@ public class AsyncUsbSerialManager {
 
     public void close() {
         isClosed = true;
+        if(mThread!=null) {
+            mThread.interrupt();
+        }
         if (mReadRequest != null) {
             mReadRequest.cancel();
             mReadRequest.close();
@@ -92,7 +96,8 @@ public class AsyncUsbSerialManager {
         }
     }
 
-    public void read(final Listener callback) {
+    public void read(final Listener callback) throws IOException {
+        checkClosed();
         if (callback == null) {
             throw new NullPointerException("callback listener is not been null");
         }
@@ -101,7 +106,7 @@ public class AsyncUsbSerialManager {
 
     private final class RequestThread extends java.lang.Thread {
         RequestThread() {
-            super("UsbSerial-" + mDriver.getDriver().getDevice().getDeviceName());
+            super("UsbSerial-" + mConnection.getSerial());
         }
 
         /**
@@ -123,14 +128,18 @@ public class AsyncUsbSerialManager {
                             }
                             mReadBuffer.flip();
                             if (mReadListener != null) {
-                                mReadListener.onNewData(mReadBuffer);
+                                try {
+                                    mReadListener.onNewData(mReadBuffer);
+                                }catch (IOException ex){
+                                    mReadListener.onRunError(ex);
+                                }
                             }
                         } else {
                             //todo Usb 连接断开
                             //return;
                         }
                     }
-                } finally {
+                }  finally {
                     mThread = null;
                 }
             }

@@ -17,7 +17,7 @@ import com.hoho.android.usbserial.util.AsyncUsbSerialManager;
 import com.hoho.android.usbserial.util.Listener;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.redriver.measurements.core.MeasureRecord;
-import com.redriver.measurements.io.AbstractFrameReceiver;
+import com.redriver.measurements.io.FrameReceiver;
 import com.redriver.measurements.io.ReceivedDataFrameParser;
 import com.redriver.measurements.io.SerialPortPreferences;
 
@@ -32,7 +32,7 @@ import java.util.concurrent.Future;
  * Usb BeeFrame 接收器
  * Created by zwq00000 on 2014/7/23.
  */
-public class UsbFrameReceiver extends AbstractFrameReceiver {
+public class UsbFrameReceiver extends FrameReceiver {
     private static final String TAG = "UsbFrameReceiver";
     private Listener mSerialPortListener = new Listener() {
         @Override
@@ -108,7 +108,6 @@ public class UsbFrameReceiver extends AbstractFrameReceiver {
                         e.printStackTrace();
                     }
                 }
-
             } else if (ACTION_USB_PERMISSION.equals(action)) {
                 boolean permission = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED,
                         false);
@@ -146,6 +145,10 @@ public class UsbFrameReceiver extends AbstractFrameReceiver {
         return null;
     }
 
+    /**
+     * 注册 Usb 事件侦听器
+     * @param context 应用上下文对象
+     */
     private void registerUsbEventReceiver(Context context) {
         mPermissionIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_USB_PERMISSION), 0);
         IntentFilter filter = new IntentFilter();
@@ -238,14 +241,19 @@ public class UsbFrameReceiver extends AbstractFrameReceiver {
         }
     }
 
+    /**
+     * 断开连接，销毁Usb 接收器
+     */
+    @Override
     public void Terminate() {
         if (this.isOpened) {
             try {
                 close();
             } catch (IOException e) {
                 e.printStackTrace();
+            }finally {
+                mContext.unregisterReceiver(this.mUsbReceiver);
             }
         }
-        mContext.unregisterReceiver(this.mUsbReceiver);
     }
 }

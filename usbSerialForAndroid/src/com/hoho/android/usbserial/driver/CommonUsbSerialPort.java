@@ -44,13 +44,10 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
 
     protected final UsbDevice mDevice;
     protected final int mPortNumber;
-
-    // non-null when open()
-    protected UsbDeviceConnection mConnection = null;
-
     protected final Object mReadBufferLock = new Object();
     protected final Object mWriteBufferLock = new Object();
-
+    // non-null when open()
+    protected UsbDeviceConnection mConnection = null;
     /**
      * read endpoint
      */
@@ -66,10 +63,14 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
     protected UsbEndpoint mInterruptEndpoint;
 
 
-    /** Internal read buffer.  Guarded by {@link #mReadBufferLock}. */
+    /**
+     * Internal read buffer.  Guarded by {@link #mReadBufferLock}.
+     */
     protected byte[] mReadBuffer;
 
-    /** Internal write buffer.  Guarded by {@link #mWriteBufferLock}. */
+    /**
+     * Internal write buffer.  Guarded by {@link #mWriteBufferLock}.
+     */
     protected byte[] mWriteBuffer;
 
     public CommonUsbSerialPort(UsbDevice device, int portNumber) {
@@ -80,19 +81,19 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
     }
 
     @Override
-    public UsbEndpoint getReadEndPoint(){
+    public UsbEndpoint getReadEndPoint() {
         return mReadEndpoint;
     }
 
     @Override
-    public UsbEndpoint getWriteEndPoint(){
+    public UsbEndpoint getWriteEndPoint() {
         return mWriteEndpoint;
     }
-    
+
     @Override
     public String toString() {
         return String.format("<%s device_name=%s device_id=%s port_number=%s>",
-                getClass().getSimpleName(), mDevice.getDeviceName(),
+                this.getClass().getSimpleName(), mDevice.getDeviceName(),
                 mDevice.getDeviceId(), mPortNumber);
     }
 
@@ -141,7 +142,7 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
     }
 
     @Override
-    public void open(UsbDeviceConnection connection) throws IOException{
+    public void open(UsbDeviceConnection connection) throws IOException {
         if (mConnection != null) {
             //throw new IOException(TAG + " already mOpened.");
             return;
@@ -151,8 +152,8 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
         boolean opened = false;
         try {
             for (int i = 0; i < mDevice.getInterfaceCount(); i++) {
-                UsbInterface usbIface = mDevice.getInterface(i);
-                if (mConnection.claimInterface(usbIface, true)) {
+                UsbInterface usbInterface = mDevice.getInterface(i);
+                if (mConnection.claimInterface(usbInterface, true)) {
                     Log.d(TAG, "claimInterface " + i + " SUCCESS");
                 } else {
                     Log.d(TAG, "claimInterface " + i + " FAIL");
@@ -163,8 +164,8 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
             for (int i = 0; i < usbInterface.getEndpointCount(); i++) {
                 UsbEndpoint ep = usbInterface.getEndpoint(i);
                 int endPointType = ep.getType();
-                switch (endPointType){
-                    case    UsbConstants.USB_ENDPOINT_XFER_BULK:
+                switch (endPointType) {
+                    case UsbConstants.USB_ENDPOINT_XFER_BULK:
                         if (ep.getDirection() == UsbConstants.USB_DIR_IN) {
                             mReadEndpoint = ep;
                         } else {
@@ -172,14 +173,14 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
                         }
                         break;
                     case UsbConstants.USB_ENDPOINT_XFER_INT:
-                        Log.d(TAG,"find Interrupt endpoint type " + ep.toString());
+                        Log.d(TAG, "find Interrupt endpoint type " + ep.toString());
                         mInterruptEndpoint = ep;
                         break;
                     case UsbConstants.USB_ENDPOINT_XFER_CONTROL:
-                        Log.d(TAG,"find Control endpoint type (endpoint zero) " + ep.toString());
+                        Log.d(TAG, "find Control endpoint type (endpoint zero) " + ep.toString());
                         break;
                     case UsbConstants.USB_ENDPOINT_XFER_ISOC:
-                        Log.d(TAG,"find Isochronous endpoint type (currently not supported) " + ep.toString());
+                        Log.d(TAG, "find Isochronous endpoint type (currently not supported) " + ep.toString());
                         break;
                 }
             }
@@ -187,8 +188,8 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
             mWriteBuffer = new byte[mWriteEndpoint.getMaxPacketSize()];
             openInternal();
             opened = true;
-        }finally {
-            if(!opened) {
+        } finally {
+            if (!opened) {
                 this.close();
             }
         }
@@ -196,9 +197,10 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
 
     /**
      * 完成打开端口操作之后需要执行的方法
+     *
      * @throws IOException
      */
-    protected void openInternal() throws IOException{
+    protected void openInternal() throws IOException {
 
     }
 
@@ -210,15 +212,16 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
 
     /**
      * 读取数据并写入到 {@link java.nio.ByteBuffer} 中
+     *
      * @param target
      * @param timeoutMillis
      * @return
      * @throws IOException
      */
-    public abstract int read(final ByteBuffer target,final int timeoutMillis) throws IOException;
+    public abstract int read(final ByteBuffer target, final int timeoutMillis) throws IOException;
 
     protected boolean isOpen() {
-        return mConnection!=null;
+        return mConnection != null;
     }
 
     @Override
@@ -228,11 +231,11 @@ abstract class CommonUsbSerialPort implements UsbSerialPort {
     public abstract void setParameters(
             int baudRate, int dataBits, int stopBits, int parity) throws IOException;
 
-    public void setParameters(SerialPortParameters parameters) throws IOException{
-        if(parameters == null){
+    public void setParameters(SerialPortParameters parameters) throws IOException {
+        if (parameters == null) {
             throw new NullPointerException("parameters is not been null");
         }
-        setParameters(parameters.baudRate,parameters.dataBits,parameters.stopBits,parameters.parity);
+        setParameters(parameters.baudRate, parameters.dataBits, parameters.stopBits, parameters.parity);
     }
 
     @Override

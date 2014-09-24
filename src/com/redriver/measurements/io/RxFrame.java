@@ -8,6 +8,7 @@ import java.io.InputStream;
 /**
  * Created by zwq00000 on 2014/5/21.
  */
+@Deprecated
 public final class RxFrame {
 
     /**

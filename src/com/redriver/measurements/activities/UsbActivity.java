@@ -14,10 +14,10 @@ import android.view.KeyEvent;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import com.redriver.measurements.core.MeasureRecord;
-import com.redriver.measurements.io.FrameReceiver;
+import com.redriver.measurements.io.IFrameReceiver;
 import com.redriver.measurements.io.R;
 import com.redriver.measurements.io.usb.BarCodeReader;
-import com.redriver.measurements.io.usb.UsbSerialPortApplication;
+import com.redriver.measurements.io.usb.FrameReceiverApplication;
 import com.redriver.measurements.warnningLamp.WarningLampReceiverProxy;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class UsbActivity extends Activity {
     private static final String TAG = "UsbActivity";
 
     static final String MEASURE_RECORD_ACTION = "com.redriver.measurements.MeasureRecord";
-    private FrameReceiver mFrameReceive;
+    private IFrameReceiver mFrameReceive;
     private TextView mDumpTextView;
     private ScrollView mScrollView;
     private BarCodeReader barCodeReader;
@@ -50,8 +50,8 @@ public class UsbActivity extends Activity {
         this.setContentView(R.layout.main);
         mDumpTextView = (TextView) findViewById(R.id.consoleText);
         mScrollView = (ScrollView) findViewById(R.id.demoScroller);
-        mFrameReceive = ((UsbSerialPortApplication) getApplication()).getFrameReceiver();
-        mFrameReceive.setDataReceivedListener(new FrameReceiver.DataReceivedListener() {
+        mFrameReceive = ((FrameReceiverApplication) getApplication()).getFrameReceiver();
+        mFrameReceive.setDataReceivedListener(new IFrameReceiver.DataReceivedListener() {
             @Override
             public void onDataReceived(MeasureRecord data) {
                 Intent receivedIntent = new Intent(MEASURE_RECORD_ACTION);

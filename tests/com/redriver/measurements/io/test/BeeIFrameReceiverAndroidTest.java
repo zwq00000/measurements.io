@@ -2,13 +2,14 @@ package com.redriver.measurements.io.test;
 
 import android.test.AndroidTestCase;
 import android.util.Log;
-import android_serialport_api.TtySerialPort;
+import android_serialport_api.SerialPort;
 import com.redriver.measurements.core.MeasureRecord;
-import com.redriver.measurements.io.BeeFrameReceiver;
+import com.redriver.measurements.io.SerialPort.InputStreamReceiver;
+import com.redriver.measurements.io.FrameReceiver;
 
 import java.io.File;
 
-public class BeeFrameReceiverAndroidTest extends AndroidTestCase {
+public class BeeIFrameReceiverAndroidTest extends AndroidTestCase {
 
     public void setUp() throws Exception {
         super.setUp();
@@ -28,9 +29,9 @@ public class BeeFrameReceiverAndroidTest extends AndroidTestCase {
     }
 
     public void testRun() throws Exception {
-        TtySerialPort s0 = new TtySerialPort(new File("/dev/ttyS0"), 115200, 0);
-        BeeFrameReceiver receiver = new BeeFrameReceiver(s0.getInputStream());
-        receiver.setDataReceivedListener(new BeeFrameReceiver.DataReceivedListener() {
+        SerialPort s0 = new SerialPort(new File("/dev/ttyS0"), 115200, 0);
+        InputStreamReceiver receiver = new InputStreamReceiver(s0.getInputStream());
+        receiver.setDataReceivedListener(new FrameReceiver.DataReceivedListener() {
             @Override
             public void onDataReceived(MeasureRecord event) {
                 //Toast.makeText(getContext(),event.getGageId() + "\t" + event.getRawValue(),Toast.LENGTH_LONG);

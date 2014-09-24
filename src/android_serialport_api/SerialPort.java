@@ -1,65 +1,86 @@
+/*
+ * Copyright 2009 Cedric Priscal
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
+ */
+
 package android_serialport_api;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import android.util.Log;
+import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by zwq00000 on 2014/7/30.
- */
-public interface SerialPort extends Closeable {
+import java.io.*;
 
+public class SerialPort implements SerialPortBase {
 
-    /** 5 mFrame bits. */
-    public static final int DATA_BITS_5 = 5;
+	private static final String TAG = "SerialPort";
 
-    /** 6 mFrame bits. */
-    public static final int DATA_BITS_6 = 6;
+	/*
+	 * Do not remove or rename the field mFd: it is used by native method close();
+	 */
+	private final FileDescriptor mFd;
+	private final FileInputStream mInput;
+	private final FileOutputStream mOutput;
+    private final String portName;
 
-    /** 7 mFrame bits. */
-    public static final int DATA_BITS_7 = 7;
+	public SerialPort(@NotNull File device, int baudRate, int flags) throws SecurityException, IOException {
 
-    /** 8 mFrame bits. */
-    public static final int DATA_BITS_8 = 8;
+		/* Check access permission */
+		if (!device.canRead() || !device.canWrite()) {
+			/*try {
+				// Missing read/write permission, trying to chmod the file
+				Process su;
+				su = Runtime.getRuntime().exec("/system/bin/su");
+				String cmd = "chmod 777 " + device.getAbsolutePath() + "\n" + "exit\n";
+                OutputStream outputStream = su.getOutputStream();
+                outputStream.write(cmd.getBytes());
+                outputStream.flush();
+                outputStream.close();
+				if ((su.waitFor() != 0) || !device.canRead()
+						|| !device.canWrite()) {
+					throw new SecurityException("chmod "+device.getAbsolutePath() + " timeout or can't write");
+				}
+			} catch (Exception e) {
+				Log.w(TAG,e.getMessage());
+				//throw new SecurityException(e.getMessage());
+			}*/
+		}
 
-    /** No parity. */
-    public static final int PARITY_NONE = 0;
+            String devicePath = device.getAbsolutePath();
+            FileUtilsProxy.setPermissions(device,777,-1,-1);
 
-    /** Odd parity. */
-    public static final int PARITY_ODD = 1;
+		mFd = open(devicePath, baudRate, flags);
+		if (mFd == null) {
+			Log.e(TAG, "native open returns null");
+			throw new IOException("native open file "+ device.getAbsolutePath() + " fail");
+		}
+		mInput = new FileInputStream(mFd);
+		mOutput = new FileOutputStream(mFd);
+        portName = device.getAbsolutePath();
+	}
 
-    /** Even parity. */
-    public static final int PARITY_EVEN = 2;
+    public String getPortName(){
+        return portName;
+    }
 
-    /** Mark parity. */
-    public static final int PARITY_MARK = 3;
+	// Getters and setters
+	public InputStream getInputStream() {
+		return mInput;
+	}
 
-    /** Space parity. */
-    public static final int PARITY_SPACE = 4;
-
-    /** 1 stop bit. */
-    public static final int STOP_BITS_1 = 1;
-
-    /** 1.5 stop bits. */
-    public static final int STOP_BITS_1_5 = 3;
-
-    /** 2 stop bits. */
-    public static final int STOP_BITS_2 = 2;
-
-
-    /**
-     * 获取输入流
-     * @return
-     */
-    public InputStream getInputStream();
-
-    /**
-     * 获取 输出流
-     * @return
-     */
-    public OutputStream getOutputStream();
+	public OutputStream getOutputStream() {
+		return mOutput;
+	}
 
     /**
      * Reads as many bytes as possible into the destination buffer.
@@ -68,19 +89,37 @@ public interface SerialPort extends Closeable {
      * @return the actual number of bytes read
      * @throws java.io.IOException if an error occurred during reading
      */
-    public int read(final byte[] buffer) throws IOException;
+    @Override
+    public int read(byte[] buffer) throws IOException {
+        return this.mInput.read(buffer);
+    }
 
     /**
      * Equivalent to {@code write(buffer, 0, buffer.length)}.
+     *
+     * @param buffer
      */
-    public void write(byte[] buffer) throws IOException ;
+    @Override
+    public void write(byte[] buffer) throws IOException {
+        this.mOutput.write(buffer);
+    }
 
     /**
      * Flushes this stream. Implementations of this method should ensure that
      * any buffered mFrame is written out. This implementation does nothing.
      *
-     * @throws IOException
-     *             if an error occurs while flushing this stream.
+     * @throws java.io.IOException if an error occurs while flushing this stream.
      */
-    public void flush() throws IOException;
+    @Override
+    public void flush() throws IOException {
+        this.mOutput.flush();
+    }
+
+    // JNI
+	@NotNull
+    private native static FileDescriptor open(String path, int baudRate, int flags);
+	public native void close();
+	static {
+		System.loadLibrary("serial_port");
+	}
 }

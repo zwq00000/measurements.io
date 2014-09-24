@@ -25,17 +25,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-public class SerialPortFinder {
+/**
+ * 串口设备查找器
+ */
+public class SerialPortDevicesFinder {
 
+    /**
+     * 串口设备类型名称
+     */
     private static final String TTY_TYPE_SERIAL = "serial";
+    /**
+     * tty 设备定义文件
+     */
     private static final String DEVICE_DEFINE_FILE_PATH = "/proc/tty/drivers";
     private static final String TAG = "SerialPort";
-    @NotNull
-    public static String Tag = "SerialPortFinder";
     @Nullable
     private final Vector<SerialDevice> mDevices;
 
-    public SerialPortFinder() throws IOException {
+    public SerialPortDevicesFinder() throws IOException {
         mDevices = new Vector<SerialDevice>();
         initDevices();
     }
@@ -85,50 +92,55 @@ public class SerialPortFinder {
         return devices.toArray(new String[devices.size()]);
     }
 
-    @NotNull
-    public String[] getAllDevicesPath() {
-        Vector<String> devices = new Vector<String>();/**/
-            for (SerialDevice device : mDevices) {
-                File[] ttyFiles = device.getDevices();
-                for (int i = 0; i < ttyFiles.length; i++) {
-                    devices.add(ttyFiles[i].getAbsolutePath());
-                }
-            }
-        return devices.toArray(new String[devices.size()]);
-    }
-
     /**
      * 驱动名、缺省的节点名、驱动的主编号、这个驱动使用的次编号范围，tty 驱动的类型
      */
-    public class SerialDevice {
+    public class SerialDevice implements FilenameFilter {
         private final String mDriverName;
-        private final String mDefaultNode;
+        private final String mFileNamePattern;
+        private final File mDevFile;
         @Nullable
         File[] mDevices = null;
 
-        public SerialDevice(String name, String root) {
-            mDriverName = name;
-            mDefaultNode = root;
+        public SerialDevice(String driverName, String devFileName) {
+            mDriverName = driverName;
+            File patternFile = new File(devFileName);
+            mFileNamePattern = patternFile.getName();
+            mDevFile = patternFile.getParentFile();
         }
 
-
+        /**
+         * 获取设备文件列表
+         * @return
+         */
         @Nullable
         public File[] getDevices() {
             if (mDevices == null) {
-                File dev = new File("/dev");
-                mDevices = dev.listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String filename) {
-                        Log.d(TAG, "filter file " + filename);
-                        return filename.contains(mDefaultNode);
-                    }
-                });
+                mDevices = mDevFile.listFiles(this);
             }
             return mDevices;
         }
 
+        /**
+         * 设备名称
+         * @return
+         */
         public String getName() {
             return mDriverName;
+        }
+
+        /**
+         * Indicates if a specific filename matches this filter.
+         *
+         * @param dir      the directory in which the {@code filename} was found.
+         * @param filename the name of the file in {@code dir} to test.
+         * @return {@code true} if the filename matches the filter
+         * and can be included in the list, {@code false}
+         * otherwise.
+         */
+        @Override
+        public boolean accept(File dir, String filename) {
+            return dir.equals(this.mDevFile) && filename.startsWith(mFileNamePattern);
         }
     }
 }

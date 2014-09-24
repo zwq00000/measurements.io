@@ -1,48 +1,68 @@
 package com.redriver.measurements.io;
 
+import android.content.Context;
 import com.redriver.measurements.core.MeasureRecord;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.EventListener;
+import com.redriver.measurements.io.SerialPort.SerialPortReceiver;
+import com.redriver.measurements.io.usb.UsbFrameReceiver;
 
 /**
+ * 测量数据帧接收器
  * Created by zwq00000 on 2014/7/22.
  */
-public interface FrameReceiver extends Closeable {
-    /**
-     * 设置 侦听器
-     * @param listener
-     */
-    void setDataReceivedListener(DataReceivedListener listener);
-
-    void OnReceivedData(MeasureRecord args);
-
+public abstract class FrameReceiver implements IFrameReceiver {
 
     /**
-     * 打开连接
-     * @return  打开状态
+     * 接收到测量数据的事件侦听器
      */
-    public void open() throws IOException;
+    private DataReceivedListener mDataReceivedListener = null;
 
-
-    /**
-     * 接收到测量数据数据帧接口
-     */
-    public interface DataReceivedListener extends EventListener {
-        /**
-         * 接收到测量数据数据帧 帧类型为 @see
-         * @param event
-         */
-        public void onDataReceived(MeasureRecord event);
+    protected FrameReceiver(){
     }
 
-    public interface OnFrameReceivedListener extends EventListener{
+    protected FrameReceiver(DataReceivedListener dataListener){
+        this.mDataReceivedListener = dataListener;
+    }
 
-        /**
-         * 接收到 @see BeeFrame (包括全部帧类型)
-         * @param args
-         */
-        public void onFrameReceived(BeeFrameArgs args);
+    /**
+     * 添加 数据接收侦听器
+     * @param listener BeeFrameReceivedListener
+     */
+    @Override
+    public synchronized void setDataReceivedListener(IFrameReceiver.DataReceivedListener listener) {
+        mDataReceivedListener = listener;
+    }
+
+    @Override
+    public void OnReceivedData(MeasureRecord args) {
+        if(mDataReceivedListener!=null){
+            mDataReceivedListener.onDataReceived(args);
+        }
+    }
+
+    /**
+     * 断开连接，销毁占用的资源
+     */
+    public void Terminate(){
+
+    }
+
+    /**
+     * 是否存在 数据接收侦听器
+     * @return
+     */
+    protected boolean hasDataReceivedListener(){
+        return mDataReceivedListener != null;
+    }
+
+    public  static FrameReceiver CreateReceiver(Context context){
+        String receiverType = SerialPortPreferences.getReceiverType(context);
+        if(receiverType.equalsIgnoreCase(UsbFrameReceiver.class.getName())){
+            return  new UsbFrameReceiver(context);
+        }
+        if(receiverType.equalsIgnoreCase(SerialPortReceiver.class.getName())){
+            return new SerialPortReceiver(context);
+        }
+        //使用默认 接收器类型
+        return  new UsbFrameReceiver(context);
     }
 }
