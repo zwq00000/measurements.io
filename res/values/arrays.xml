@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 波特率 -->
+    <string-array name="serial_baud_rate_values">
+        <item>115200</item>
+        <item>19200</item>
+        <item>14400</item>
+        <item>9600</item>
+    </string-array>
+    <string-array name="serial_baud_rate">
+        <item>115200</item>
+        <item>19200</item>
+        <item>14400</item>
+        <item>9600</item>
+    </string-array>
+
+    <!-- 奇偶校验 -->
+    <string-array name="serial_parity">
+        <item>无校验</item>
+        <item>奇校验</item>
+        <item>偶校验</item>
+    </string-array>
+    <string-array name="serial_parity_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <!-- 停止位 -->
+    <string-array name="serial_stop_bits">
+        <item>无</item>
+        <item>1位停止位</item>
+        <item>1.5位停止位</item>
+    </string-array>
+    <string-array name="serial_stop_bits_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <!-- 数据位 -->
+    <string-array name="serial_data_bits">
+        <item>8 位</item>
+        <item>7 位</item>
+        <item>6 位</item>
+        <item>5 位</item>
+    </string-array>
+    <string-array name="serial_data_bits_values">
+        <item>8</item>
+        <item>7</item>
+        <item>6</item>
+        <item>5</item>
+    </string-array>
+
+</resources>

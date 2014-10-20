@@ -1,4 +1,4 @@
-package com.redriver.measurements.io.SerialPort;
+package com.redriver.measurements.io.serial;
 
 import android.util.Log;
 import com.redriver.measurements.core.MeasureRecord;

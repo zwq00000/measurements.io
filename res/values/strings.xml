@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ACTIVITY_ENTRY_NAME</string>
+    <string name="app_name">Measurements.io</string>
     <string name="refreshing">Refreshing...</string>
     <string name="search_label">search_label</string>
     <string name="search_hint">search_hint</string>
     <string name="settings_description">search_hint</string>
     <string name="searchSuggest_Authority">jifengda.measurements</string>
+    <string name="button_driver_type">接收器类型</string>
+    <string name="button_port_name">端口名称</string>
+    <string name="button_baud_rate">波特率</string>
+    <string name="button_data_bits">数据位</string>
+    <string name="button_parity">校验类型</string>
+    <string name="button_stop_bits">停止位</string>
+    <string name="key_baud_rate">baudRate</string>
+    <string name="key_data_bits">dataBits</string>
+    <string name="key_stop_bits">stopBits</string>
+    <string name="key_parity">parity</string>
+    <string name="key_port_name">portName</string>
+    <string name="key_receiver_type">receiverType</string>
+    <string name="summary_baud_rate">波特率:%s</string>
+    <string name="summary_parity">校验类型:%s</string>
+    <string name="key_use_serial_receiver">useSerialReceiver</string>
+    <string name="receiver_type_usb">USB 接收器</string>
+    <string name="receiver_type_rs232">串口接收器</string>
+    <string name="summary_serial_type_usb">使用 USB 接收器</string>
+    <string name="summary_serial_type_rs232">使用 RS232 串口接收器</string>
+    <string name="summary_port_name">端口名称:%s</string>
+    <string name="serial_parameters">串口通讯参数</string>
 </resources>

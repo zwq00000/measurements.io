@@ -78,6 +78,10 @@ public class SerialPortDevicesFinder {
         return mDevices;
     }
 
+    /**
+     * 获取 设备名称
+     * @return
+     */
     @NotNull
     public String[] getAllDevices() {
         ArrayList<String> devices = new ArrayList<String>();
@@ -95,10 +99,17 @@ public class SerialPortDevicesFinder {
     /**
      * 驱动名、缺省的节点名、驱动的主编号、这个驱动使用的次编号范围，tty 驱动的类型
      */
-    public class SerialDevice implements FilenameFilter {
+    public class SerialDevice {
         private final String mDriverName;
         private final String mFileNamePattern;
         private final File mDevFile;
+        private final FilenameFilter devFilenameFilter = new FilenameFilter(){
+            @Override
+            public boolean accept(File dir, String filename) {
+                return dir.equals(mDevFile) && filename.startsWith(mFileNamePattern);
+            }
+        };
+
         @Nullable
         File[] mDevices = null;
 
@@ -116,7 +127,7 @@ public class SerialPortDevicesFinder {
         @Nullable
         public File[] getDevices() {
             if (mDevices == null) {
-                mDevices = mDevFile.listFiles(this);
+                mDevices = mDevFile.listFiles(devFilenameFilter);
             }
             return mDevices;
         }
@@ -127,20 +138,6 @@ public class SerialPortDevicesFinder {
          */
         public String getName() {
             return mDriverName;
-        }
-
-        /**
-         * Indicates if a specific filename matches this filter.
-         *
-         * @param dir      the directory in which the {@code filename} was found.
-         * @param filename the name of the file in {@code dir} to test.
-         * @return {@code true} if the filename matches the filter
-         * and can be included in the list, {@code false}
-         * otherwise.
-         */
-        @Override
-        public boolean accept(File dir, String filename) {
-            return dir.equals(this.mDevFile) && filename.startsWith(mFileNamePattern);
         }
     }
 }

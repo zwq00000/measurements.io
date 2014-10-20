@@ -1,8 +1,9 @@
 package com.redriver.measurements.io;
 
 import android.content.Context;
+import android_serialport_api.SerialPort;
 import com.redriver.measurements.core.MeasureRecord;
-import com.redriver.measurements.io.SerialPort.SerialPortReceiver;
+import com.redriver.measurements.io.serial.SerialPortReceiver;
 import com.redriver.measurements.io.usb.UsbFrameReceiver;
 
 /**
@@ -52,17 +53,5 @@ public abstract class FrameReceiver implements IFrameReceiver {
      */
     protected boolean hasDataReceivedListener(){
         return mDataReceivedListener != null;
-    }
-
-    public  static FrameReceiver CreateReceiver(Context context){
-        String receiverType = SerialPortPreferences.getReceiverType(context);
-        if(receiverType.equalsIgnoreCase(UsbFrameReceiver.class.getName())){
-            return  new UsbFrameReceiver(context);
-        }
-        if(receiverType.equalsIgnoreCase(SerialPortReceiver.class.getName())){
-            return new SerialPortReceiver(context);
-        }
-        //使用默认 接收器类型
-        return  new UsbFrameReceiver(context);
     }
 }

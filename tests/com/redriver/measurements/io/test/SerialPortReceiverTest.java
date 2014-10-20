@@ -4,7 +4,7 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 import com.redriver.measurements.core.MeasureRecord;
 import com.redriver.measurements.io.IFrameReceiver;
-import com.redriver.measurements.io.SerialPort.SerialPortReceiver;
+import com.redriver.measurements.io.serial.SerialPortReceiver;
 
 public class SerialPortReceiverTest extends AndroidTestCase {
 

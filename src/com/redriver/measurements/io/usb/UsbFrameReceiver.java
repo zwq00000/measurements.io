@@ -18,8 +18,8 @@ import com.hoho.android.usbserial.util.Listener;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.redriver.measurements.core.MeasureRecord;
 import com.redriver.measurements.io.FrameReceiver;
+import com.redriver.measurements.io.FrameReceiverPreferences;
 import com.redriver.measurements.io.ReceivedDataFrameParser;
-import com.redriver.measurements.io.SerialPortPreferences;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -77,6 +77,7 @@ public class UsbFrameReceiver extends FrameReceiver {
     private PendingIntent mPermissionIntent;
     private boolean isOpened = false;
     private Future<?> mRunnableFuture;
+    private final FrameReceiverPreferences portPreferences;
     /**
      * 打开的设备名称
      */
@@ -135,6 +136,7 @@ public class UsbFrameReceiver extends FrameReceiver {
             throw new NullPointerException("UsbManager is not been Null");
         }
         registerUsbEventReceiver(context);
+        portPreferences = FrameReceiverPreferences.getInstance(context);
     }
 
     private static UsbSerialDriver getUsbSerialDriver(UsbManager usbManager) {
@@ -171,7 +173,7 @@ public class UsbFrameReceiver extends FrameReceiver {
             throw new IOException("打开 USB 设备 失败");
         }
         AsyncUsbSerialManager manager = new AsyncUsbSerialManager(connection, serialPort);
-        manager.setParameters(SerialPortPreferences.getParameters(mContext));
+        manager.setParameters(portPreferences.getParameters());
         manager.open();
         manager.read(mSerialPortListener);
     }

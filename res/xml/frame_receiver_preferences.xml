@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="接收器设定">
+        <SwitchPreference
+                android:key="@string/key_use_serial_receiver"
+                android:title="@string/button_driver_type"
+                android:switchTextOff="@string/receiver_type_usb"
+                android:switchTextOn="@string/receiver_type_rs232"
+                android:textOff="@string/receiver_type_usb"
+                android:textOn="@string/receiver_type_rs232"
+                android:summaryOff="@string/summary_serial_type_usb"
+                android:summaryOn="@string/summary_serial_type_rs232"
+                />
+        <ListPreference
+                android:key="@string/key_port_name"
+                android:title="@string/button_port_name"
+                android:summary="@string/summary_port_name"
+                android:dependency="@string/key_use_serial_receiver"
+                />
+        </PreferenceCategory>
+        <PreferenceCategory android:title="@string/serial_parameters">
+            <ListPreference
+                    android:key="@string/key_baud_rate"
+                    android:defaultValue="115200"
+                    android:title="@string/button_baud_rate"
+                    android:entryValues="@array/serial_baud_rate_values"
+                    android:entries="@array/serial_baud_rate"
+                    android:summary="@string/summary_baud_rate"
+                    android:selectable="true"/>
+            <ListPreference
+                    android:key="@string/key_parity"
+                    android:title="@string/button_parity"
+                    android:defaultValue="0"
+                    android:entries="@array/serial_parity"
+                    android:entryValues="@array/serial_parity_values"
+                    android:summary="@string/summary_parity"
+                    />
+        </PreferenceCategory>
+</PreferenceScreen>

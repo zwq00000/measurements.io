@@ -2,7 +2,7 @@ package com.redriver.measurements.io.test;
 
 import com.redriver.measurements.core.MeasureRecord;
 import com.redriver.measurements.io.BeeFrame;
-import com.redriver.measurements.io.SerialPort.InputStreamReceiver;
+import com.redriver.measurements.io.serial.InputStreamReceiver;
 import junit.framework.TestCase;
 import java.io.IOException;
 import java.io.OutputStream;

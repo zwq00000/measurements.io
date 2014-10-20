@@ -80,11 +80,16 @@ public class UsbSerialTest extends AndroidTestCase {
         serialPortManager.open();
         serialPortManager.read(new Listener() {
             @Override
-            public void onNewData(ByteBuffer data) throws IOException {
+            public void onNewData(ByteBuffer data) {
                 assertNotNull(data);
                 assertNotNull(data.array());
                 Log.d(TAG,"buffer position:"+data.position() + "\tlimit:"+data.limit());
-                MeasureRecord record = ReceivedDataFrameParser.readFromBytes(data.array());
+                MeasureRecord record = null;
+                try {
+                    record = ReceivedDataFrameParser.readFromBytes(data.array());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 Log.d(TAG, "gageId:" + record.getGageId() + "\tvalue:" + record.getRawValue());
                 assertNotNull(record);
             }
@@ -116,12 +121,17 @@ public class UsbSerialTest extends AndroidTestCase {
 
         mSerialIoManager = new SerialInputOutputManager(sPort, new Listener() {
             @Override
-            public void onNewData(ByteBuffer data) throws IOException {
+            public void onNewData(ByteBuffer data) {
                 Log.d(TAG,"SerialInputOutputManager onNewData");
                 assertNotNull(data);
                 assertNotNull(data.array());
                 Log.d(TAG,"buffer position:"+data.position() + "\tlimit:"+data.limit());
-                MeasureRecord record = ReceivedDataFrameParser.readFromBytes(data.array());
+                MeasureRecord record = null;
+                try {
+                    record = ReceivedDataFrameParser.readFromBytes(data.array());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 Log.d(TAG, "gageId:" + record.getGageId() + "\tvalue:" + record.getRawValue());
                 assertNotNull(record);
             }

@@ -4,7 +4,7 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 import android_serialport_api.SerialPort;
 import com.redriver.measurements.core.MeasureRecord;
-import com.redriver.measurements.io.SerialPort.InputStreamReceiver;
+import com.redriver.measurements.io.serial.InputStreamReceiver;
 import com.redriver.measurements.io.FrameReceiver;
 
 import java.io.File;
