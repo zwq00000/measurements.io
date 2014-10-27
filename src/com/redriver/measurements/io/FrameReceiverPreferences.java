@@ -2,6 +2,7 @@ package com.redriver.measurements.io;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import com.hoho.android.usbserial.SerialPortParameters;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
@@ -17,41 +18,44 @@ import java.io.IOException;
 public final class FrameReceiverPreferences {
 
     /**
+     * 奇偶校验 默认值
+     */
+    private static int DEFAULT_PARITY;
+    /**
+     * 数据位 默认值
+     */
+    private static int DEFAULT_DATA_BITS;
+    /**
      * 波特率 键名
      */
-    static final String KEY_BAUD_RATE = "baudRate";
+    static String KEY_BAUD_RATE;
     /**
      * 数据位
      */
-    static final String KEY_DATA_BITS = "dataBits";
+    static String KEY_DATA_BITS;
     /**
      * 停止位 键名
      */
-    static final String KEY_STOP_BITS = "stopBits";
+    static String KEY_STOP_BITS;
 
     /**
      * 校验类型
      */
-    static final String KEY_PARITY = "parity";
+    static String KEY_PARITY;
 
     /**
      * 默认端口名称
      */
-    static final String KEY_PORT_NAME = "portName";
+    static String KEY_PORT_NAME = null;
 
     /**
      * 接收器类型 存储键
      */
-    static final String key_use_serial_receiver = "useSerialReceiver";
-
-    /**
-     * 默认 接收器类型
-     */
-    static final String Default_ReceiverType = "UsbFrameReceiver";
+    static String KEY_USE_SERIAL_RECEIVER;
     /**
      * 默认 波特率 115200
      */
-    private static final String DEFAULT_BAUD_RATE = "115200";
+    private static int DEFAULT_BAUD_RATE;
     /**
      * 默认实例
      */
@@ -73,6 +77,18 @@ public final class FrameReceiverPreferences {
     private FrameReceiverPreferences(Context context) {
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
         this.mContext = context;
+        if(KEY_PORT_NAME == null) {
+            Resources resource = context.getResources();
+            KEY_PORT_NAME = resource.getString(R.string.key_port_name);
+            KEY_BAUD_RATE = resource.getString(R.string.key_baud_rate);
+            KEY_DATA_BITS = resource.getString(R.string.key_data_bits);
+            KEY_PARITY = resource.getString(R.string.key_parity);
+            KEY_STOP_BITS = resource.getString(R.string.key_stop_bits);
+            KEY_USE_SERIAL_RECEIVER = resource.getString(R.string.key_use_serial_receiver);
+            DEFAULT_BAUD_RATE = resource.getInteger(R.integer.default_baud_rate);
+            DEFAULT_DATA_BITS = resource.getInteger(R.integer.default_data_bits);
+            DEFAULT_PARITY = resource.getInteger(R.integer.default_parity);
+        }
     }
 
     /**
@@ -110,12 +126,12 @@ public final class FrameReceiverPreferences {
     }
 
     /**
-     * 获取外部存储路径
+     * 获取 串口波特率
      *
      * @return
      */
     public int getBaudRate() {
-        return Integer.parseInt(preferences.getString(KEY_BAUD_RATE, DEFAULT_BAUD_RATE));
+        return preferences.getInt(KEY_BAUD_RATE, DEFAULT_BAUD_RATE);
     }
 
     /**
@@ -131,13 +147,17 @@ public final class FrameReceiverPreferences {
         preferences.edit().putInt(key, value).commit();
     }
 
+    private void setValue(String key, boolean value) {
+        preferences.edit().putBoolean(key, value).commit();
+    }
+
     /**
      * 获取 数据位 设置
      *
      * @return
      */
     public int getDataBits() {
-        return Integer.parseInt(preferences.getString(KEY_DATA_BITS,Integer.toString(UsbSerialPort.DATABITS_8)));
+        return preferences.getInt(KEY_DATA_BITS,DEFAULT_DATA_BITS);
     }
 
     /**
@@ -229,7 +249,7 @@ public final class FrameReceiverPreferences {
      */
     public String getReceiverType() {
         //是否使用串口接收器 true 为串口,false 为USB口
-        boolean useSerialReceiver = preferences.getBoolean(key_use_serial_receiver, true);
+        boolean useSerialReceiver = preferences.getBoolean(KEY_USE_SERIAL_RECEIVER, true);
         if(useSerialReceiver){
             return SerialPortReceiver.class.getName();
         }else{
@@ -243,22 +263,20 @@ public final class FrameReceiverPreferences {
      */
     public FrameReceiver getFrameReceiver(){
         //是否使用串口接收器 true 为串口,false 为USB口
-        boolean useSerialReceiver = preferences.getBoolean(key_use_serial_receiver, true);
+        boolean useSerialReceiver = preferences.getBoolean(KEY_USE_SERIAL_RECEIVER, true);
 
         if(mReceiver!=null){
             //配置改变，销毁原有接收器实例
             if(useSerialReceiver != mReceiver instanceof SerialPortReceiver){
                 try {
-                    mReceiver.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    mReceiver.Terminate();
                 }finally {
                     mReceiver = null;
                 }
             }
         }
 
-        if(this.mReceiver == null){
+        if(this.mReceiver == null || this.mReceiver.isClosed()){
             if(useSerialReceiver){
                 mReceiver = new SerialPortReceiver(mContext);
             }else{
@@ -269,13 +287,10 @@ public final class FrameReceiverPreferences {
     }
 
     /**
-     * 设置 接收器类型
-     *
-     * @param context
-     * @param receiverType
+     * 设置 使用 USB 接收器
      */
-    public void setReceiverType(Context context, String receiverType) {
-        setValue(key_use_serial_receiver, receiverType);
+    public void setUseUsbReceiver(boolean useUsbReceiver) {
+            setValue(KEY_USE_SERIAL_RECEIVER, !useUsbReceiver);
     }
 }
 

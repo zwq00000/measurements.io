@@ -57,7 +57,7 @@ public class SerialPort implements SerialPortBase {
 		}
 
             String devicePath = device.getAbsolutePath();
-            FileUtilsProxy.setPermissions(device,777,-1,-1);
+            FileUtilsProxy.setPermissions(device,777);
 
 		mFd = open(devicePath, baudRate, flags);
 		if (mFd == null) {
@@ -68,6 +68,21 @@ public class SerialPort implements SerialPortBase {
 		mOutput = new FileOutputStream(mFd);
         portName = device.getAbsolutePath();
 	}
+
+    private void setPermissions(File device) throws IOException {
+        Process su = Runtime.getRuntime().exec("/system/bin/su");
+        String cmd = String.format("chmod 777 %s \nexit\n", device.getAbsolutePath());
+        OutputStream output = null;
+        try {
+            output = su.getOutputStream();
+            output.write(cmd.getBytes());
+            output.flush();
+        }finally {
+            if(output!=null) {
+                output.close();
+            }
+        }
+    }
 
     public String getPortName(){
         return portName;

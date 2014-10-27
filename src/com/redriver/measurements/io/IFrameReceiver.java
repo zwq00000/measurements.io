@@ -29,6 +29,12 @@ public interface IFrameReceiver extends Closeable {
      */
     public void open() throws IOException;
 
+    /**
+     * 接收器是否已经关闭
+     * @return
+     */
+    public boolean isClosed();
+
 
     /**
      * 接收到测量数据数据帧接口

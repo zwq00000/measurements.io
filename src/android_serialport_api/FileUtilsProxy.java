@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -34,17 +36,17 @@ public class FileUtilsProxy {
 
     private static final String TAG = "FileUtilsProxy";
 
+    private static final String proxy_class_name = "android.os.FileUtils";
+    private static final String method_setPermissions_name = "setPermissions";
+
     static{
         Class<?> hideClass = null;
         try {
-            hideClass = Class.forName("android.os.FileUtils");
-            Method[] hideMethods = hideClass.getMethods();
-            method_setPermissions = null;
-            for (int i=0;i<hideMethods.length;i++){
-                if(hideMethods[i].getName().equals("setPermissions")){
-                    method_setPermissions = hideMethods[i];
-                    break;
-                }
+            hideClass = Class.forName(proxy_class_name);
+            try {
+                method_setPermissions = hideClass.getMethod(method_setPermissions_name,String.class,int.class,int.class,int.class);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
             }
         } catch (ClassNotFoundException e) {
             Log.d(TAG,e.getMessage());
@@ -60,7 +62,7 @@ public class FileUtilsProxy {
      * @return
      * @throws java.io.FileNotFoundException
      */
-    public static int setPermissions(@NotNull File file, int mode, int uid, int gid) throws FileNotFoundException {
+    private static int setPermissions(@NotNull File file, int mode, int uid, int gid) throws FileNotFoundException {
          if(method_setPermissions == null){
              throw new NullPointerException("setPermissions method is null");
          }
@@ -69,12 +71,47 @@ public class FileUtilsProxy {
                 throw new FileNotFoundException("文件 "+file.getAbsolutePath() + " 不存在");
             }
             Integer result = (Integer) method_setPermissions.invoke(null, file.getAbsolutePath(), mode, uid, gid);
+            Log.d(TAG,"FileUtils.setPermissions return "+result);
             return result.intValue();
         } catch (IllegalAccessException e) {
             Log.d(TAG,e.getMessage());
         } catch (InvocationTargetException e) {
             Log.d(TAG,e.getMessage());
         }
-        return -1;
+        return 1;
+    }
+
+    /**
+     * 设置文件权限
+     * @param file
+     * @param mode
+     * @throws IOException
+     */
+    public static int setPermissions(@NotNull File file, int mode) throws IOException {
+        if(file == null){
+            throw new NullPointerException("file is not been null");
+        }
+        if(!file.exists()){
+            throw new FileNotFoundException("文件 "+file.getAbsolutePath() + " 不存在");
+        }
+        if(setPermissions(file,mode,-1,-1)!=0){
+            chmod(file,mode);
+        }
+        return  0;
+    }
+
+    private static void chmod(@NotNull File file, int mode) throws IOException {
+        Process su = Runtime.getRuntime().exec("/system/bin/su");
+        String cmd = String.format("chmod %d %s \nexit\n",mode,file.getAbsolutePath());
+        OutputStream output = null;
+        try {
+            output = su.getOutputStream();
+            output.write(cmd.getBytes());
+            output.flush();
+        }finally {
+            if(output!=null) {
+                output.close();
+            }
+        }
     }
 }

@@ -27,8 +27,9 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="com.hoho.android.usbserial.0.2.1" level="project" />
     <orderEntry type="library" name="measurements.core" level="project" />
+    <orderEntry type="module" module-name="redriver.common" />
+    <orderEntry type="library" name="com.hoho.android.usbserial.0.2.1" level="project" />
   </component>
 </module>
 

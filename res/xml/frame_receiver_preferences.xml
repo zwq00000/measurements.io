@@ -12,30 +12,41 @@
                 android:textOn="@string/receiver_type_rs232"
                 android:summaryOff="@string/summary_serial_type_usb"
                 android:summaryOn="@string/summary_serial_type_rs232"
+                android:icon="@drawable/ic_usb"
                 />
         <ListPreference
                 android:key="@string/key_port_name"
                 android:title="@string/button_port_name"
                 android:summary="@string/summary_port_name"
                 android:dependency="@string/key_use_serial_receiver"
+                android:icon="@drawable/ic_port"
                 />
         </PreferenceCategory>
+    <!-- 串口参数 -->
         <PreferenceCategory android:title="@string/serial_parameters">
-            <ListPreference
+            <IntListPreference
                     android:key="@string/key_baud_rate"
-                    android:defaultValue="115200"
+                    android:defaultValue="@integer/default_baud_rate"
                     android:title="@string/button_baud_rate"
                     android:entryValues="@array/serial_baud_rate_values"
                     android:entries="@array/serial_baud_rate"
                     android:summary="@string/summary_baud_rate"
                     android:selectable="true"/>
-            <ListPreference
+            <IntListPreference
                     android:key="@string/key_parity"
                     android:title="@string/button_parity"
-                    android:defaultValue="0"
+                    android:defaultValue="@integer/default_parity"
                     android:entries="@array/serial_parity"
                     android:entryValues="@array/serial_parity_values"
                     android:summary="@string/summary_parity"
+                    />
+            <IntListPreference
+                    android:key="@string/key_data_bits"
+                    android:title="@string/button_data_bits"
+                    android:defaultValue="@integer/default_data_bits"
+                    android:entries="@array/serial_data_bits"
+                    android:entryValues="@array/serial_data_bits_values"
+                    android:summary="@string/summary_data_bits"
                     />
         </PreferenceCategory>
 </PreferenceScreen>

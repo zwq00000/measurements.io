@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="default_data_bits">8</integer>
+    <integer name="default_parity">0</integer>
+    <integer name="default_baud_rate">115200</integer>
+</resources>

@@ -58,24 +58,22 @@ public final class InputStreamReceiver extends FrameReceiver implements  Runnabl
     }
 
     /**
-     * 打开连接
+     * 打开接收器 内部实现的
      *
-     * @return 打开状态
+     * @throws java.io.IOException
      */
     @Override
-    public void open() throws IOException {
+    protected void openInternal() throws IOException {
+
     }
 
     /**
-     * Closes the object and release any system resources it holds.
-     * <p/>
-     * <p>Although only the first call has any effect, it is safe to call close
-     * multiple times on the same object. This is more lenient than the
-     * overridden {@code AutoCloseable.close()}, which may be called at most
-     * once.
+     * 关闭接收器 内部实现
+     *
+     * @throws java.io.IOException
      */
     @Override
-    public void close() throws IOException {
+    protected void closeInternal() throws IOException {
         mReceiverStream.close();
     }
 }

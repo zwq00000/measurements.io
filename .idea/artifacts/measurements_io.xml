@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="measurements.io">
-    <output-path>$PROJECT_DIR$/../Libs</output-path>
-    <root id="archive" name="measurements.io.jar">
-      <element id="module-output" name="measurements.io" />
-    </root>
-  </artifact>
-</component>

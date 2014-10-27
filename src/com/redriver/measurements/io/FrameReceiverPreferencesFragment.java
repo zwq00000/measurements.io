@@ -12,9 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 串口配置首选项设置片段
+ * 接收器配置首选项设置片段
  */
-public class SerialPreferencesFragment extends PreferenceFragment {
+public class FrameReceiverPreferencesFragment extends PreferenceFragment {
     private static final String TAG = "SerialPreferencesFragment";
 
     @Override
@@ -22,7 +22,7 @@ public class SerialPreferencesFragment extends PreferenceFragment {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.frame_receiver_preferences);
         String portNameKey = getResources().getString(R.string.key_port_name);
-        Preference portNamePref = findPreference(FrameReceiverPreferences.KEY_PORT_NAME);
+        Preference portNamePref = findPreference(portNameKey);
         if (portNamePref != null) {
             if (portNamePref instanceof ListPreference) {
                 fillSerialPorts((ListPreference) portNamePref);

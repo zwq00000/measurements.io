@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
  * Usb BeeFrame 接收器
@@ -50,15 +48,10 @@ public class UsbFrameReceiver extends FrameReceiver {
         @Override
         public void onRunError(Exception e) {
             Log.d(TAG, e.getMessage());
-            try {
-                UsbFrameReceiver.this.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            UsbFrameReceiver.this.close();
         }
     };
-    private static final String ACTION_USB_PERMISSION =
-            "com.redriver.action.USB_PERMISSION";
+
     private static final List<String> deviceNameList = new ArrayList<String>();
     /**
      * Usb 串口
@@ -67,22 +60,18 @@ public class UsbFrameReceiver extends FrameReceiver {
     /**
      * Usb 串口通讯管理器
      */
-    private static SerialInputOutputManager mSerialIoManager;
+    //private static SerialInputOutputManager mSerialIoManager;
     /**
      * 轮询服务线程
      */
-    private static ExecutorService mExecutor;
     private final UsbManager mUsbManager;
     private final Context mContext;
     private PendingIntent mPermissionIntent;
-    private boolean isOpened = false;
-    private Future<?> mRunnableFuture;
     private final FrameReceiverPreferences portPreferences;
     /**
      * 打开的设备名称
-     */
     private String mDeviceName;
-    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
+   private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -118,7 +107,8 @@ public class UsbFrameReceiver extends FrameReceiver {
                 }
             }
         }
-    };
+    };*/
+    private AsyncUsbSerialManager mSerialManager;
 
     public UsbFrameReceiver(Context context, DataReceivedListener receivedListener) {
         this(context);
@@ -135,7 +125,7 @@ public class UsbFrameReceiver extends FrameReceiver {
         if (mUsbManager == null) {
             throw new NullPointerException("UsbManager is not been Null");
         }
-        registerUsbEventReceiver(context);
+        //registerUsbEventReceiver(context);
         portPreferences = FrameReceiverPreferences.getInstance(context);
     }
 
@@ -150,7 +140,7 @@ public class UsbFrameReceiver extends FrameReceiver {
     /**
      * 注册 Usb 事件侦听器
      * @param context 应用上下文对象
-     */
+     *//*
     private void registerUsbEventReceiver(Context context) {
         mPermissionIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_USB_PERMISSION), 0);
         IntentFilter filter = new IntentFilter();
@@ -159,87 +149,61 @@ public class UsbFrameReceiver extends FrameReceiver {
         filter.addAction(ACTION_USB_PERMISSION);
         filter.addDataScheme("file");
         filter.addDataPath("xml/device_filter", PatternMatcher.PATTERN_SIMPLE_GLOB);
-        context.registerReceiver(mUsbReceiver, filter);
-    }
+        //context.registerReceiver(mUsbReceiver, filter);
+    }*/
 
     /**
-     * 初始化 串口配置
-     *
-     * @param serialPort
+     * 打开接收器 方法 内部实现
+     * @param usbSerialDriver
+     * @throws IOException
      */
-    private void initSerialPort(UsbSerialPort serialPort) throws IOException {
-        UsbDeviceConnection connection = mUsbManager.openDevice(serialPort.getDriver().getDevice());
-        if (connection == null) {
-            throw new IOException("打开 USB 设备 失败");
-        }
-        AsyncUsbSerialManager manager = new AsyncUsbSerialManager(connection, serialPort);
-        manager.setParameters(portPreferences.getParameters());
-        manager.open();
-        manager.read(mSerialPortListener);
-    }
-
     private void openInternal(UsbSerialDriver usbSerialDriver) throws IOException {
         if (usbSerialDriver == null) {
             return;
         }
         sPort = usbSerialDriver.getPorts().get(0);
-        initSerialPort(sPort);
-        if (mSerialIoManager != null) {
-            mSerialIoManager.stop();
+        UsbDeviceConnection connection = mUsbManager.openDevice(sPort.getDriver().getDevice());
+        if (connection == null) {
+            throw new IOException("打开 USB 设备 失败");
         }
-        if (mRunnableFuture != null) {
-            mRunnableFuture.cancel(true);
-            mRunnableFuture = null;
-        }
-        if (mExecutor != null) {
-            mExecutor.shutdown();
-            mExecutor = null;
-        }
+        mSerialManager = new AsyncUsbSerialManager(connection, sPort);
+        mSerialManager.setParameters(portPreferences.getParameters());
+        mSerialManager.read(mSerialPortListener);
+        mSerialManager.open();
     }
 
+
     /**
-     * 打开连接
+     * 打开接收器 内部实现的
+     *
+     * @throws java.io.IOException
      */
     @Override
-    public void open() throws IOException {
-        if (isOpened) {
-            //todo 设备已经打开
-            return;
-        }
+    protected void openInternal() throws IOException {
         UsbSerialDriver driver = getUsbSerialDriver(mUsbManager);
         if (driver == null) {
             throw new IOException("没有找到匹配的设备");
         }
-        this.mDeviceName = driver.getDevice().getDeviceName();
         openInternal(driver);
-        isOpened = true;
     }
 
     /**
-     * Closes the object and release any system resources it holds.
-     * <p/>
-     * <p>Although only the first call has any effect, it is safe to call close
-     * multiple times on the same object. This is more lenient than the
-     * overridden {@code AutoCloseable.close()}, which may be called at most
-     * once.
+     * 关闭接收器 内部实现
+     *
+     * @throws java.io.IOException
      */
     @Override
-    public void close() throws IOException {
+    protected void closeInternal() throws IOException {
         try {
             if (sPort != null) {
                 sPort.close();
                 sPort = null;
             }
-            if (mRunnableFuture != null) {
-                mRunnableFuture.cancel(true);
-                mRunnableFuture = null;
-            }
-            if (mExecutor != null) {
-                mExecutor.shutdown();
-                mExecutor = null;
+            if(mSerialManager!=null){
+                mSerialManager.close();
             }
         } finally {
-            isOpened = false;
+            mSerialManager = null;
         }
     }
 
@@ -248,14 +212,8 @@ public class UsbFrameReceiver extends FrameReceiver {
      */
     @Override
     public void Terminate() {
-        if (this.isOpened) {
-            try {
-                close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }finally {
-                mContext.unregisterReceiver(this.mUsbReceiver);
-            }
+        if (!this.isClosed()) {
+            close();
         }
     }
 }

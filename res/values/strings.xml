@@ -12,12 +12,12 @@
     <string name="button_data_bits">数据位</string>
     <string name="button_parity">校验类型</string>
     <string name="button_stop_bits">停止位</string>
-    <string name="key_baud_rate">baudRate</string>
-    <string name="key_data_bits">dataBits</string>
-    <string name="key_stop_bits">stopBits</string>
-    <string name="key_parity">parity</string>
-    <string name="key_port_name">portName</string>
-    <string name="key_receiver_type">receiverType</string>
+    <string name="key_baud_rate">serial_baudRate</string>
+    <string name="key_data_bits">serial_dataBits</string>
+    <string name="key_stop_bits">serial_stopBits</string>
+    <string name="key_parity">serial_parity</string>
+    <string name="key_port_name">serial_portName</string>
+    <string name="key_receiver_type">serial_receiverType</string>
     <string name="summary_baud_rate">波特率:%s</string>
     <string name="summary_parity">校验类型:%s</string>
     <string name="key_use_serial_receiver">useSerialReceiver</string>
@@ -27,4 +27,6 @@
     <string name="summary_serial_type_rs232">使用 RS232 串口接收器</string>
     <string name="summary_port_name">端口名称:%s</string>
     <string name="serial_parameters">串口通讯参数</string>
+    <string name="summary_data_bits">%s 数据位</string>
+
 </resources>

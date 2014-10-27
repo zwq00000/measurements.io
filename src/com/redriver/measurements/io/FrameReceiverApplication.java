@@ -1,9 +1,6 @@
 package com.redriver.measurements.io;
 
 import android.app.Application;
-import android.util.Log;
-
-import java.io.IOException;
 
 /**
  * 测量数据帧接收器 应用程序,提供应用程序级的 接收器 资源管理
@@ -16,6 +13,10 @@ public class FrameReceiverApplication extends Application {
      * 帧数据接收器实例
      */
     private FrameReceiver mFrameReceiver;
+    /**
+     * 数据侦听器
+     */
+    private IFrameReceiver.DataReceivedListener mListener;
 
     @Override
     public void onCreate() {
@@ -41,6 +42,7 @@ public class FrameReceiverApplication extends Application {
 
     /**
      * 获取接收器实例
+     *
      * @return
      */
     public IFrameReceiver getFrameReceiver() {
@@ -51,15 +53,23 @@ public class FrameReceiverApplication extends Application {
     /**
      * 初始化接收器
      */
-    private void initFrameReceiver(){
-        if(mFrameReceiver == null){
-            mFrameReceiver = FrameReceiverPreferences.getInstance(this).getFrameReceiver();
-            try {
-                mFrameReceiver.open();
-            } catch (IOException e) {
-                Log.d(TAG,e.getMessage());
-                mFrameReceiver = null;
-            }
+    public void initFrameReceiver() {
+        mFrameReceiver = FrameReceiverPreferences.getInstance(this).getFrameReceiver();
+        if (mListener != null) {
+            mFrameReceiver.setDataReceivedListener(mListener);
+        }
+        mFrameReceiver.open();
+    }
+
+    /**
+     * 设置 侦听器
+     *
+     * @param listener
+     */
+    public void setDataReceivedListener(IFrameReceiver.DataReceivedListener listener) {
+        this.mListener = listener;
+        if (mFrameReceiver != null) {
+            mFrameReceiver.setDataReceivedListener(listener);
         }
     }
 }

@@ -24,7 +24,6 @@ public class SerialPortReceiver extends FrameReceiver {
     private static final String TAG = "SerialPortReceiver";
     private File mPort;
     private SerialPort mSerialPort;
-    private boolean isClosed;
     private Thread mThread;
     private FrameReceiverPreferences portPreferences;
 
@@ -111,16 +110,15 @@ public class SerialPortReceiver extends FrameReceiver {
     }
 
     /**
-     * 打开连接
+     * 打开接收器 内部实现的
      *
-     * @return 打开状态
+     * @throws java.io.IOException
      */
     @Override
-    public void open() throws IOException {
+    protected void openInternal() throws IOException {
         if (mThread != null) {
             return;
         }
-        isClosed = false;
         if (mPort == null) {
             mPort = getPortFile();
         }
@@ -130,16 +128,12 @@ public class SerialPortReceiver extends FrameReceiver {
     }
 
     /**
-     * Closes the object and release any system resources it holds.
-     * <p/>
-     * <p>Although only the first call has any effect, it is safe to call close
-     * multiple times on the same object. This is more lenient than the
-     * overridden {@code AutoCloseable.close()}, which may be called at most
-     * once.
+     * 关闭接收器 内部实现
+     *
+     * @throws java.io.IOException
      */
     @Override
-    public void close() throws IOException {
-        isClosed = true;
+    protected void closeInternal() throws IOException {
         if (mSerialPort != null) {
             mSerialPort.getInputStream().close();
             mSerialPort.close();
@@ -157,7 +151,7 @@ public class SerialPortReceiver extends FrameReceiver {
 
         @Override
         public void run() {
-            while (!isClosed) {
+            while (!isClosed()) {
                 if (mSerialPort != null) {
                     try {
                         MeasureRecord record = ReceivedDataFrameParser.readFromStream(mSerialPort.getInputStream());
